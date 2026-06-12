@@ -1,0 +1,69 @@
+package com.zensar.service;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
+import com.zensar.dto.UserDto;
+import com.zensar.entity.UserEntity;
+import com.zensar.repo.UserService;
+
+@Service
+public class DBUserService implements UserDetailsService {
+
+	@Autowired
+	UserService userService;
+
+	@Autowired
+	PasswordEncoder passwordEncoder;
+
+	@Autowired
+	ModelMapper modelMapper;
+
+	@Override
+	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+		List<UserEntity> usename = userService.findByUserName(username);
+		if (usename == null || usename.size() == 0) {
+			throw new UsernameNotFoundException(username);
+		} else {
+			UserEntity userEntity = usename.getFirst();
+			String roles = userEntity.getRoles();
+
+			Collection<GrantedAuthority> authorities = new ArrayList<>();
+			for (String role : roles.split(",")) {
+				authorities.add(new SimpleGrantedAuthority(role.trim()));
+			}
+
+			return new User(userEntity.getUserName(), passwordEncoder.encode(userEntity.getPassword()), authorities);
+		}
+	}
+
+	public UserDto userRegistor(UserDto userDto) {
+		UserEntity userEntity = modelMapper.map(userDto, UserEntity.class);
+		UserEntity savedObj = userService.save(userEntity);
+		UserDto savedUserDto = modelMapper.map(savedObj, UserDto.class);
+		return savedUserDto;
+
+	}
+
+	public UserDto getUserInfo(String userName)
+	{
+		List<UserEntity> userlist = userService.findByUserName(userName);
+		UserEntity userEntity= userlist.getFirst();
+		UserDto userDto = modelMapper.map(userEntity, UserDto.class);
+		
+		return userDto;
+		
+	}
+}

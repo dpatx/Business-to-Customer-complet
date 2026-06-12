@@ -1,0 +1,30 @@
+spring:
+  application:
+    name: OLX-Login
+  config:
+    import: "optional:configserver:http://localhost:8888/"
+
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+  instance:
+    prefer-ip-address: true
+    hostname: localhost
+server:
+  port: 8089
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  health:
+    circuitbreakers:
+      enabled: true
+  
+springdoc:
+ show-actuator: true
+ api-docs:
+    path: /user-management/v3/api-docs
+ swagger-ui:
+    path: /user-management/swagger-ui.html        

@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: OLX-LOGIN
+			import:
+				- configserver:http://localhost:8888
+ 
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+  instance:
+    prefer-ip-address: true
+    hostname: localhost

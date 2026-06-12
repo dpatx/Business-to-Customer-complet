@@ -1,0 +1,48 @@
+# Conversion to YAML from Properties formar report
+# Warnings:
+# - Multiple values [OLX-API-GATEWAY, gateway-service, product-service-demo, user-service-demo] assigned to 'name'. Values are merged into a yaml sequence node.
+# - Multiple values [id: PRODUCT-SERVICE-DEMO, Path=/productapp/**, /product-service-demo/v3/api-docs, id: USER-SERVICE-DEMO, Path=/user-management/**, /user-service-demo/v3/api-docs, url: /v3/api-docs, url: /product-service-demo/v3/api-docs, url: /user-service-demo/v3/api-docs] assigned to '-'. Values are merged into a yaml sequence node.
+# - Multiple values [lb://PRODUCT-SERVICE-DEMO, lb://USER-SERVICE-DEMO] assigned to 'uri'. Values are merged into a yaml sequence node.
+# - Multiple values [/v3/api-docs, /swagger-ui.html] assigned to 'path'. Values are merged into a yaml sequence node.
+server: ''
+port: 9191
+spring: ''
+application: ''
+name:
+- OLX-API-GATEWAY
+- gateway-service
+- product-service-demo
+- user-service-demo
+cloud: ''
+gateway: ''
+webmvc: ''
+routes: ''
+'-':
+- 'id: PRODUCT-SERVICE-DEMO'
+- Path=/productapp/**, /product-service-demo/v3/api-docs
+- 'id: USER-SERVICE-DEMO'
+- Path=/user-management/**, /user-service-demo/v3/api-docs
+- 'url: /v3/api-docs'
+- 'url: /product-service-demo/v3/api-docs'
+- 'url: /user-service-demo/v3/api-docs'
+uri:
+- lb://PRODUCT-SERVICE-DEMO
+- lb://USER-SERVICE-DEMO
+predicates: ''
+eureka: ''
+client: ''
+register-with-eureka: true
+fetch-registry: true
+instance: ''
+prefer-ip-address: true
+hostname: localhost
+instance-id: ${spring.application.name}:${random.uuid}
+springdoc: ''
+api-docs: ''
+enabled: true
+path:
+- /v3/api-docs
+- /swagger-ui.html
+swagger-ui: ''
+config-url: /v3/api-docs/swagger-config
+urls: ''

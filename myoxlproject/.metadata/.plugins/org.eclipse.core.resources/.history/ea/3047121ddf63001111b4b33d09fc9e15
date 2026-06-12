@@ -1,0 +1,47 @@
+package com.zensar.service;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+// Import the native Resilience4j circuit breaker classes
+import io.github.resilience4j.circuitbreaker.CircuitBreaker;
+import io.github.resilience4j.circuitbreaker.CircuitBreakerRegistry;
+
+@Service
+public class UserDelegateImpl implements UserDelegate {
+
+	@Autowired
+	RestTemplate restTemplate;
+	
+	private UserAuthClient userAuthClient;
+	
+	// Change from CircuitBreakerFactory to CircuitBreakerRegistry
+	private CircuitBreakerRegistry circuitBreakerRegistry;
+	
+	UserDelegateImpl(CircuitBreakerRegistry circuitBreakerRegistry, UserAuthClient userAuthClient){
+		this.circuitBreakerRegistry = circuitBreakerRegistry;
+		this.userAuthClient = userAuthClient;
+	}
+	
+	@Override
+	public boolean isTokenValid(String authToken) {
+		HttpHeaders headers = new HttpHeaders();
+		headers.add("Authorization", authToken);
+		HttpEntity<String> entity = new HttpEntity<>(headers);
+
+		// 1. Fetch or create the circuit breaker from the registry (bridges to Actuator)
+		CircuitBreaker circuitBreaker = circuitBreakerRegistry.circuitBreaker("TOKEN-VALIDATION");
+
+		// 2. Wrap and run your RestTemplate call inside the circuit breaker execution block
+		return circuitBreaker.executeSupplier(() -> 
+			restTemplate.exchange("http://OLX-LOGIN/user-management/token/validate", 
+					 HttpMethod.GET, entity, Boolean.class).getBody()
+		);
+	}
+     
+	// Note: The native decorator automatically handles throwing exceptions, 
+	// but you can catch them using standard try-catch blocks or custom wrappers if you need a specific fallback value.
+}

@@ -1,0 +1,15 @@
+spring:
+  application:
+    name: OLX-Login
+  config:
+    import: "optional:configserver:http://localhost:8888/"
+
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+  instance:
+    prefer-ip-address: true
+    hostname: localhost
+server:
+  port: 8089		

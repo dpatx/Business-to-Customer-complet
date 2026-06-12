@@ -1,0 +1,72 @@
+package com.zensar.controller;
+
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.authentication.LockedException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.web.bind.annotation.*;
+
+import com.zensar.dto.AuthResponseDto;
+import com.zensar.dto.LoginRequest;
+import com.zensar.dto.UserDto;
+import com.zensar.repo.UserServiceImpl;
+import com.zensar.security.JwtUtils;
+import com.zensar.service.DBUserService;
+
+@RestController
+@RequestMapping("/user-management")
+public class UserManagmentController {
+
+	
+	@Autowired
+	AuthenticationManager authenticationManager;
+	
+	@Autowired
+	UserDetailsService userDetailsService;
+
+	@Autowired
+	JwtUtils jwtUtils;
+	
+	@Autowired
+	DBUserService dBUserService;
+	
+	@PostMapping(value = "/user/authenticate", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE) // Public endpoint
+	public ResponseEntity<AuthResponseDto> login(@RequestBody LoginRequest loginRequest) {
+
+		try {
+	        Authentication authentication = authenticationManager.authenticate(
+	            new UsernamePasswordAuthenticationToken(loginRequest.getUserName(), loginRequest.getPassword())
+	        );
+	        
+	        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+	        String token = jwtUtils.generateToken(userDetails);
+	        String expiration = jwtUtils.extractExpiration(token).toString();
+	        return ResponseEntity.ok(new AuthResponseDto(token,expiration));
+	        
+	    } catch (BadCredentialsException e) {
+	        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+	    } catch (DisabledException | LockedException e) {
+	        return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+	    }
+	}
+	
+	@PostMapping(value = "/user", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE) // Public endpoint
+	public ResponseEntity<UserDto> userRegister(@RequestBody UserDto userDto) {
+
+		userServiceImpl.userRegistor(userDto);
+		
+		return ResponseEntity.ok(userDto);
+	}
+	
+	
+
+}

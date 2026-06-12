@@ -1,0 +1,15 @@
+package com.zensar.service;
+
+import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
+
+// 'name' must match the spring.application.name of your target service in Eureka
+@FeignClient(name = "OLX-LOGIN")
+public interface UserAuthClient {
+
+    // The mapping, parameters, and return types must match the target controller endpoint exactly
+    @GetMapping("/user-management/user/token/validate")
+    ResponseEntity<Boolean> validateToken(@RequestHeader("Authorization") String authHeader);
+}

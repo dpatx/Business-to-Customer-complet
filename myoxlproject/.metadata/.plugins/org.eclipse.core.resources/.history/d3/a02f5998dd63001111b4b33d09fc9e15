@@ -1,0 +1,38 @@
+spring:
+  application:
+    name: OLX-Advertises
+  config:
+    import: "optional:configserver:http://localhost:8888/"
+
+server:
+  port: 9090
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+  instance:
+    prefer-ip-address: true
+    hostname: localhost
+ 
+resilience4j:
+  circuitbreaker:
+    instances:
+      TOKEN-VALIDATION:
+        registerHealthIndicator: true
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        failureRateThreshold: 50
+        minimumNumberOfCalls: 5
+        permittedNumberOfCallsInHalfOpenState: 3
+        waitDurationInOpenState: 5s
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  health:
+    circuitbreakers:
+      enabled: true
+		  endpoint:
+		    health:
+		      show-details: always   

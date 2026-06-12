@@ -1,0 +1,129 @@
+package com.zensar.service;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.zensar.dto.AdvertiseDto;
+import com.zensar.entity.AdvertiseEntity;
+import com.zensar.exception.InvalidTokenException;
+
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+
+@Service
+public class AdvertiseServiceImpl implements AdvertiseService {
+
+	@Autowired
+	EntityManager entityManager;
+	
+	@Autowired
+	ModelMapper modelMapper;
+	
+	@Autowired
+	UserDelegate userDelegate;
+	
+	@Override
+	public List<AdvertiseDto> searchAdvertiseByFilterCriteria(String searchText, String category, String postedBy,
+			String dateCondition, LocalDate onDate, LocalDate fromDate, LocalDate toDate, String sortBy, int pageNo,
+			int pageSize) {
+		
+		CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+		CriteriaQuery<AdvertiseEntity> criteriaQuery = criteriaBuilder.createQuery(AdvertiseEntity.class);
+		Root<AdvertiseEntity> rootEntity = criteriaQuery.from(AdvertiseEntity.class);
+		
+		Predicate predicateTitle = criteriaBuilder.and();
+		Predicate predicateDescription = criteriaBuilder.and();
+		Predicate predicateSearchText = criteriaBuilder.and();
+		Predicate predicatePostedBy = criteriaBuilder.and();
+		Predicate predicateOnDate = criteriaBuilder.and();
+		Predicate predicateFinal = criteriaBuilder.and();
+		
+		if(searchText != null && !"".equalsIgnoreCase(searchText)) {
+			// WHERE title LIKE '%searchText%'
+			predicateTitle = criteriaBuilder.like(rootEntity.get("title"), "%" + searchText + "%");
+			predicateDescription = criteriaBuilder.like(rootEntity.get("description"), "%" + searchText + "%");
+			predicateSearchText = criteriaBuilder.or(predicateTitle, predicateDescription);
+		}
+		
+		if(dateCondition != null && !"".equalsIgnoreCase(dateCondition)) {
+			if("equals".equalsIgnoreCase(dateCondition)) {
+				predicateOnDate = criteriaBuilder.equal(rootEntity.get("onDate"), onDate);
+			}
+		}
+		
+		predicateFinal = criteriaBuilder.and(predicateSearchText, predicatePostedBy, predicateOnDate);
+		criteriaQuery.where(predicateFinal);
+		
+		criteriaQuery.orderBy(criteriaBuilder.asc(rootEntity.get("title")));
+		
+		TypedQuery<AdvertiseEntity> typedQuery = entityManager.createQuery(criteriaQuery);
+		typedQuery.setFirstResult(pageNo);
+		typedQuery.setMaxResults(pageSize);
+		
+		List<AdvertiseEntity> advertiseEntityList = typedQuery.getResultList(); //Query is actually fired on database
+		//convert advertiseEntityList into advertiseDtoList & send back to the user
+		return convertEntityListIntoDtoList(advertiseEntityList);
+	}
+	
+	private List<AdvertiseDto> convertEntityListIntoDtoList(List<AdvertiseEntity> advertiseEntityList) {
+		
+		/*
+		 //Use the below code in case attributes of entity & dto are not matching
+		TypeMap<AdvertiseEntity, AdvertiseDto> typedMap 
+			= modelMapper.typeMap(AdvertiseEntity.class, AdvertiseDto.class);
+		typedMap.addMapping(AdvertiseEntity::getStatus, AdvertiseDto::setAdvStatus);
+		*/
+		List<AdvertiseDto> advertiseDtoList = new ArrayList<>();
+		for(AdvertiseEntity advertiseEntity: advertiseEntityList) {
+			AdvertiseDto advertiseDto = modelMapper.map(advertiseEntity, AdvertiseDto.class);
+			advertiseDtoList.add(advertiseDto);
+		}
+		return advertiseDtoList;
+	}
+
+	@Override
+	public AdvertiseDto postNewAdvertise(AdvertiseDto advertiseDto, String authToken) {
+		
+		if(userDelegate.isTokenValid(authToken)) {
+			//code to post new advertise
+			System.out.println("Posting new advertise");
+		}
+		else {
+			throw new InvalidTokenException(authToken);
+		}
+		return null;
+	}
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

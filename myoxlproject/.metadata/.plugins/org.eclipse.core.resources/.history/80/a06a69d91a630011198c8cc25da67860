@@ -1,0 +1,48 @@
+package com.zensar;
+
+import java.util.Collections;
+
+import org.modelmapper.ModelMapper;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
+import org.springframework.context.annotation.Bean;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
+import io.swagger.v3.oas.models.Components;
+import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.security.SecurityRequirement;
+import io.swagger.v3.oas.models.security.SecurityScheme;
+
+@SpringBootApplication
+@EnableDiscoveryClient
+public class OlxLoginApplication {
+
+	public static void main(String[] args) {
+		SpringApplication.run(OlxLoginApplication.class, args);
+	}
+	
+	@Bean
+	public PasswordEncoder getPasswordEncoder() {
+
+		return new BCryptPasswordEncoder();
+	}
+
+	@Bean
+	public ModelMapper getModelMapper() {
+		return new ModelMapper();
+	}
+	
+	@Bean
+	public OpenAPI customOpenAPI() {
+		final String bearerAuthScheme = "bearer-jwt";
+ 
+		return new OpenAPI().info(new Info().title("RPG Art Collection API").version("v1"))
+				.components(new Components().addSecuritySchemes(bearerAuthScheme,
+						new SecurityScheme().type(SecurityScheme.Type.HTTP).scheme("bearer").bearerFormat("JWT")
+								.in(SecurityScheme.In.HEADER).name("Authorization")))
+				.addSecurityItem(new SecurityRequirement().addList(bearerAuthScheme, Collections.emptyList()));
+	}
+}

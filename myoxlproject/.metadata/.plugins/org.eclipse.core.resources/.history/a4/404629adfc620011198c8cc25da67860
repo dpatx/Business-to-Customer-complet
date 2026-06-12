@@ -1,0 +1,58 @@
+package com.zensar.security;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.ProviderManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.SecurityFilterChain;
+
+@Configuration
+public class SecurityConfiguration {
+	
+	@Autowired
+	PasswordEncoder passwordEncoder;
+
+	@Autowired
+	UserDetailsService userDetailsService;
+	
+	@Bean
+	public SecurityFilterChain getAuthorization(HttpSecurity httpSecurity) throws Exception {
+		
+		httpSecurity.csrf(csrf->csrf.disable())
+		.authorizeHttpRequests(oauth->oauth
+				//.requestMatchers("/user-management/user/authenticate").hasAnyRole("USER", "ADMIN")
+				.requestMatchers("/user-management/user","/user-management/user/token/validate", "/user-management/user/logout", "/user-management/user/authenticate","/swagger-ui/**", "/v3/api-docs/**").permitAll()
+				.anyRequest().authenticated()
+				).formLogin(Customizer.withDefaults());
+		return httpSecurity.build();
+	}
+	
+	@Bean
+	public AuthenticationManager getAuthenticationManager() {
+		return new ProviderManager(getAuthenticationProvider());
+	}
+	@Bean
+	public AuthenticationProvider getAuthenticationProvider() {
+		DaoAuthenticationProvider daoAuthenticationProvider = new DaoAuthenticationProvider(userDetailsService);
+		daoAuthenticationProvider.setPasswordEncoder(passwordEncoder);
+		return daoAuthenticationProvider;
+	}
+	
+	/*
+	 * @Bean public UserDetailsService getUsers() { UserBuilder users =
+	 * User.builder(); UserDetails tomUser =
+	 * users.username("deep").password(passwordEncoder.encode("deep123")).roles(
+	 * "USER").build(); UserDetails jerryUser =
+	 * users.username("jerry").password(passwordEncoder.encode("jerry123")).roles(
+	 * "ADMIN").build(); return new InMemoryUserDetailsManager(tomUser, jerryUser);
+	 * }
+	 */
+}

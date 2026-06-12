@@ -1,0 +1,28 @@
+package com.zensar.repo;
+
+import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import com.zensar.dto.UserDto;
+import com.zensar.entity.UserEntity;
+
+@Service
+public class UserServiceImpl {
+	
+	@Autowired
+	UserService  userService; 
+	
+	@Autowired
+	ModelMapper modelMapper;
+	
+	public UserDto userRegistor(UserDto userDto) {
+		
+		UserEntity userEntity = modelMapper.map(userDto, UserEntity.class);
+		System.out.println(userEntity);
+		userService.save(userEntity);
+		return userDto;
+		
+	}
+
+}

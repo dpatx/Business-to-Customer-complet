@@ -1,0 +1,69 @@
+package com.zensar.entity;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+
+@Table(name="USERS")
+@Entity
+public class UserEntity {
+
+	@Id
+	@GeneratedValue(strategy = GenerationType.AUTO)
+	@Column
+	private int id;
+	
+	@Column
+	private String userName;
+	@Column
+	private String password;
+	@Column
+	private String roles;
+	@Column
+	private String firstName;
+	@Column
+	private String lastName;
+	@Column
+	private String email;
+	@Column
+	private String phone;
+	
+	
+	
+	
+	public UserEntity(int id, String userName, String password, String roles, String firstName, String lastName,
+			String email, String phone) {
+		super();
+		this.id = id;
+		this.userName = userName;
+		this.password = password;
+		this.roles = roles;
+		this.firstName = firstName;
+		this.lastName = lastName;
+		this.email = email;
+		this.phone = phone;
+	}
+	
+	public UserEntity() {
+		super();
+			}
+	
+	public UserEntity(String userName, String password, String roles, String firstName, String lastName,
+			String email, String phone) {
+		super();
+		
+		this.userName = userName;
+		this.password = password;
+		this.roles = roles;
+		this.firstName = firstName;
+		this.lastName = lastName;
+		this.email = email;
+		this.phone = phone;
+	}
+
+
+	
+}

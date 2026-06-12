@@ -1,0 +1,30 @@
+package com.zensar.repo;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.stereotype.Service;
+
+import com.zensar.entity.TokenEnity;
+
+@Service
+public class TokenServiceImpl {
+
+	@Autowired
+	 @Lazy
+	TokenService tokenService;
+	
+		
+	public void addToken(String token) {
+		TokenEnity tokenEntity = new TokenEnity(token);		
+		tokenService.save(tokenEntity);
+		
+	}
+	
+	public String getTokens(String token) {
+		List<TokenEnity> list= tokenService.findByToken(token);
+		String savedtoken = list!=null&& !list.isEmpty()?list.getFirst().getToken():""; 
+		return savedtoken;
+	}
+}

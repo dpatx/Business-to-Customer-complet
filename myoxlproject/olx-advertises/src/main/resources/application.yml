@@ -1,0 +1,41 @@
+spring:
+  application:
+    name: OLX-Advertises
+  config:
+    import: "optional:configserver:http://localhost:8888/"
+  cloud:
+    config:
+      allow-override: true
+      override-none: false
+      override-system-properties: false
+
+server:
+  port: 9090
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      TOKEN-VALIDATION:
+        registerHealthIndicator: true
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        failureRateThreshold: 50
+        minimumNumberOfCalls: 5
+        permittedNumberOfCallsInHalfOpenState: 3
+        waitDurationInOpenState: 5s
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  health:
+    circuitbreakers:
+      enabled: true
+  endpoint:
+    health:
+      show-details: always
+springdoc:
+  api-docs:
+    path: /olx-advertise/v3/api-docs
+  swagger-ui:
+    path: /olx-advertise/swagger-ui.html			

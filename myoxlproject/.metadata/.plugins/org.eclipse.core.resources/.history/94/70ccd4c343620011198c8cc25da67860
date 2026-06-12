@@ -1,0 +1,32 @@
+package com.zensar.service;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+
+@Service
+public class UserDelegateImpl implements UserDelegate {
+
+	@Autowired
+	RestTemplate restTemplate;
+	
+	@Override
+	public boolean isTokenValid(String authToken) {
+		HttpHeaders headers = new HttpHeaders();
+		headers.set("Authorization", authToken);
+		HttpEntity<String> httpEntity = new HttpEntity<>(headers);
+		ResponseEntity<Boolean> result = restTemplate.exchange(
+				"http://localhost:8080/user-management/user/token/validate",
+				HttpMethod.GET, httpEntity, Boolean.class); //Remote call
+		boolean isTokenValid = result.getBody();
+		return isTokenValid;
+	}
+
+}
+
+//Inter microservice communication techniques:
+// RestTemplate, Feign client, WebClient, Kafka

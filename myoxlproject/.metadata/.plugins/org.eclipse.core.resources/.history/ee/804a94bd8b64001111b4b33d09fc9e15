@@ -1,0 +1,43 @@
+server:
+  port: 9191
+
+spring:
+  application:
+    name: OLX-API-GATEWAY
+  cloud:
+    gateway:
+      server:
+        webmvc:
+          routes:
+          - id: OLX-Advertises
+            uri: lb://PRODUCT-SERVICE-DEMO
+            predicates:
+            - Path=/olx-advertise/**, /olx-advertise/v3/api-docs
+          - id: USER-SERVICE-DEMO
+            uri: lb://USER-SERVICE-DEMO
+            predicates:
+            - Path=/user-management/**, /user-service-demo/v3/api-docs
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+  instance:
+    prefer-ip-address: true
+    hostname: localhost
+    instance-id: ${spring.application.name}:${random.uuid}
+
+springdoc:
+  api-docs:
+    enabled: true
+    path: /v3/api-docs
+  swagger-ui:
+    enabled: true
+    path: /swagger-ui.html
+    config-url: /v3/api-docs/swagger-config
+    urls:
+      - url: /v3/api-docs
+        name: gateway-service
+      - url: /olx-advertise/v3/api-docs
+        name: olx-advertise
+      - url: /user-service-demo/v3/api-docs
+        name: user-service-demo
